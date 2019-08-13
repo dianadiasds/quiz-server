@@ -20,8 +20,8 @@ const User = db.define(
 const Question = db.define(
     'question',
     {
-        question: Sequelize.ARRAY(Sequelize.STRING),
-        answer: Sequelize.STRING
+        question: Sequelize.STRING,
+        answer: Sequelize.ARRAY(Sequelize.STRING)
     }
 )
 User.belongsTo(Game)
