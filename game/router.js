@@ -26,7 +26,7 @@ const { Router } = require('express');
 const bcrypt = require('bcrypt')
 const router = new Router()
 
-router.post('/user', (request, response,next)=>{
+router.post('/login', (request, response,next)=>{
     console.log('REQUEST_BODY',request.body)
     User
         .create({
