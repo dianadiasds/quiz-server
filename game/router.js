@@ -41,19 +41,5 @@ router.put('/user/:gameId',(request, response,next)=>{
    .update({ score: 0 }, { where: { gameId: request.params.gameId }})
 }) 
 
-router.put('/user/answer',(request, response,next)=>{
-    const { gameId, userId, answerText } = request.body
-    Game.findByPk(gameId)
-    User.findByPk(userId)
-    const correct = game.answer[0] === answerText
-    if (correct) {
-        User.update({score: score + 1, answered: true })
-    }
-        const others = game.users.filter(user => user.id !== userId)
-        const allAnswered = game.users.every(user => user.answered)
-        if (allAnswered) {
-            const question = Question.findByPk()
-            game.update({question})
-        }
-})
+
 module.exports=router
