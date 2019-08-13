@@ -1,8 +1,8 @@
 const { Router } = require('express')
 const { toJWT, toData } = require('./jwt')
-const User = require('../game/model')
+const {User} = require('../game/model')
 const bcrypt = require('bcrypt');
-const auth=require('./middleware')
+ const auth=require('./middleware')
 
 const router = new Router()
 
@@ -10,16 +10,7 @@ router.post('/login', (request, response,next)=>{
         const { body } = request;
         const { name } = body;
         const { password } = body;
-        // if(email === user.email && password === user.password) { 
-        //     jwt.sign({user}, 'privatekey', { expiresIn: '1h' },(err, token) => {
-        //         if(err) { console.log(err) }    
-        //         response.send(token);
-        //     });
-        // } else {
-        //     response.status(400).send({
-        //         message: 'Please supply a valid email and password'
-        //       })
-        // }
+
         if(!name && !password){
             response.status(400).send({
                 message: 'Please supply a valid name and password'

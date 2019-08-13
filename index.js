@@ -12,9 +12,9 @@ const bodyParser = require('body-parser')
 const authRouter= require('./auth/router')
 const parserMiddleware = bodyParser.json()
 
-const userFactory = require('./game/router.js')
-const userRouter = userFactory(stream)
-app.use(userRouter)
+const userRouter = require('./game/router.js')
+//const userRouter = userFactory(stream)
+
 
 const port = process.env.PORT || 5000
 

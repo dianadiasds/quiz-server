@@ -1,4 +1,4 @@
-const User = require('../game/model')
+const {User} = require('../game/model')
 const { toData } = require('./jwt')
 
 function auth(req, res, next) {
