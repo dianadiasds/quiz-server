@@ -23,14 +23,14 @@ app.use(authRouter)
 app.use(userRouter)
 
 
-app.get('/game',
-    async (request, response) => {
-    const games = await Game
-        .findAll( {include: [User]})
-    const data = JSON.stringify(games)
-        stream.updateInit(data)
-        stream.init(request, response)
-})
+// app.get('/game',
+//     async (request, response) => {
+//     const games = await Game
+//         .findAll( {include: [User]})
+//     const data = JSON.stringify(games)
+//         stream.updateInit(data)
+//         stream.init(request, response)
+// })
 
 app.listen(
     port,

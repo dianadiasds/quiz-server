@@ -4,7 +4,7 @@ const db = new Sequelize(databaseUrl)
 
 
 db
-    .sync()
+    .sync({force:false})
     .then(() => console.log('Database synced'))
 
 module.exports = db
