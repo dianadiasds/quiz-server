@@ -9,6 +9,7 @@ const Sse = require('json-sse')
 const stream = new Sse()
 
 const bodyParser = require('body-parser')
+const authRouter= require('./auth/router')
 const parserMiddleware = bodyParser.json()
 
 const userFactory = require('./game/router.js')
@@ -18,6 +19,7 @@ app.use(userRouter)
 const port = process.env.PORT || 5000
 
 app.use(parserMiddleware)
+app.use(authRouter)
 app.use(userRouter)
 
 
