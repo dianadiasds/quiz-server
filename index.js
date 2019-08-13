@@ -1,4 +1,7 @@
 const express = require('express')
+const cors = require('cors')
+const middleware = cors()
+
 // const questions = require('questions.js)
 // const Question = require('./question/model')
 const app = express()
@@ -17,7 +20,7 @@ const userRouter = require('./game/router.js')
 
 
 const port = process.env.PORT || 5000
-
+app.use(middleware)
 app.use(parserMiddleware)
 app.use(authRouter)
 app.use(userRouter)
