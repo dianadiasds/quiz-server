@@ -1,4 +1,7 @@
 const express = require('express')
+const cors = require('cors')
+const middleware = cors()
+
 // const questions = require('questions.js)
 // const Question = require('./question/model')
 const { User, Game, Question } = require('./game/model')
@@ -18,7 +21,7 @@ const gameFactory = require('./game/router.js')
 
 
 const port = process.env.PORT || 5000
-
+app.use(middleware)
 app.use(parserMiddleware)
 
 async function serialize () {
@@ -33,6 +36,7 @@ async function update () {
     stream.send(data)
 }
 
+
 app.get('/game',
     async (request, response) => {
         const data = await serialize()
@@ -46,8 +50,6 @@ app.use(authRouter)
 
 const gameRouter = gameFactory(stream, update)
 app.use(gameRouter)
-
-
 
 
 app.listen(
