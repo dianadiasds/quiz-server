@@ -51,8 +51,7 @@ function factory (stream, update) {
 
             const game = await Game.create({questionId: gameQuestion.id})
 
-            const data = await serialize()
-            stream.send(data)
+            await update()
 
             response.send(game)
         });
