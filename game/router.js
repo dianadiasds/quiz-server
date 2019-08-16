@@ -71,13 +71,17 @@ function factory(stream, update) {
   });
 
   router.put('/answer/:gameId', auth, async(request, response, next) => {
-    const {userId, answer} = request.body;
-    console.log("userId test:", userId)
+    const {jwt, answer} = request.body;
+    console.log("userId test:", jwt)
     console.log('answer test:', answer);
+
+    const { userId } = toData(jwt)
 
     try {
       const game = await Game.findByPk(request.params.gameId, {include: [Question]});
       // console.log('game test:', game.dataValues);
+        const user = await User.findByPk(parseInt(userId));
+        console.log('user test:', user.dataValues);
 
       const userUpdate = {answered: true};
 
@@ -93,7 +97,7 @@ function factory(stream, update) {
       const allAnswered = updatedGame.users.every(user => user.answered);
       console.log('allAnswered test:', allAnswered);
       if (allAnswered) {
-          const question = await Question.findAll({
+          const question = await Question.findOne({
               where: {
                   id: {
                       [Op.not]: game.questionId
