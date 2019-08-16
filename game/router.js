@@ -2,111 +2,130 @@ const Sequelize = require('sequelize');
 const {User, Game, Question} = require('./model');
 const {Router} = require('express');
 const bcrypt = require('bcrypt');
+const auth = require('../auth/middleware');
 
 const Op = Sequelize.Op
 
-function factory (stream, update) {
-    const router = new Router();
+function factory(stream, update) {
+  const router = new Router();
 
-    router.post('/user', (request, response, next) => {
-        console.log('REQUEST_BODY', request.body);
-        User
-            .create({
-                name: request.body.name,
-                password: bcrypt.hashSync(request.body.password, 10),
-            })
-            .then(user => {
-                response.send(user)
-            })
-            .catch(next)
-    });
-
-    router.put('/start/:gameId', async (request, response, next) => {
-        const count = await User
-            .update({score: 0}, {where: {gameId: request.params.gameId}})
-
-        await update()
-
-        response.send({ count })
-    });
-
-    router.put('/join/:gameId', async (request, response, next) => {
-        const { userId } = request.body
-        const { gameId } = request.params
-
-        const user = await User.findByPk(userId)
-        user.update({ gameId })
-
-        await update()
-
+  router.post('/user', (request, response, next) => {
+    console.log('REQUEST_BODY', request.body);
+    User
+      .create({
+      name: request.body.name,
+      password: bcrypt.hashSync(request.body.password, 10)
+    })
+      .then(user => {
         response.send(user)
+      })
+      .catch(next)
+  });
+
+  router.put('/start/:gameId', auth, async(request, response, next) => {
+    const count = await User.update({
+      score: 0
+    }, {
+      where: {
+        gameId: request.params.gameId
+      }
+    })
+
+    await update()
+
+    response.send(count)
+  });
+
+  router.put('/join/:gameId', auth, async (request, response, next) => {
+    const {gameId} = request.params
+    const {user} = request;
+
+   await user.update({gameId: gameId})
+   const users = await User.findAll({
+    where: {
+      gameId: gameId
+    }
+  })
+
+    await update()
+
+    response.send({count: users.length})
+  });
+
+  router.post('/game', auth, async(request, response, next) => {
+
+    const gameQuestion = await Question.findOne({
+      order: [Sequelize.fn('RANDOM')],
+      limit: 1
     });
 
-    router.post('/game',
-        async (request, response, next) => {
+    console.log('gameQuestion test:', gameQuestion)
 
-            const gameQuestion = await Question.findOne({order: [Sequelize.fn('RANDOM')], limit: 1});
+    const game = await Game.create({questionId: gameQuestion.id})
 
-            console.log('gameQuestion test:', gameQuestion)
+    await update()
 
-            const game = await Game.create({questionId: gameQuestion.id})
+    response.send(game)
+  });
 
-            await update()
+  router.put('/answer/:gameId', auth, async(request, response, next) => {
+    const {userId, answer} = request.body;
+    console.log("userId test:", userId)
+    console.log('answer test:', answer);
 
-            response.send(game)
-        });
+    try {
+      const game = await Game.findByPk(request.params.gameId, {include: [Question]});
+      // console.log('game test:', game.dataValues);
 
-    router.put('/answer/:gameId', async (request, response, next) => {
-        const { userId, answer } = request.body;
-        console.log("userId test:", userId)
-        console.log('answer test:', answer);
+      const user = await User.findByPk(parseInt(userId));
+      console.log('user test:', user.dataValues);
 
-        try {
-            const game = await Game.findByPk(request.params.gameId, {include: [Question]});
-            // console.log('game test:', game.dataValues);
+      const userUpdate = {
+        answered: true
+      }
 
-            const user = await User.findByPk(parseInt(userId));
-            console.log('user test:', user.dataValues);
+      const correct = game.question.answer[0] === answer;
+      console.log('correct test:', correct)
+      if (correct) {
+        userUpdate.score = user.score + 1
+      }
+      await user.update(userUpdate)
 
-            const userUpdate = {answered: true}
+      const updatedGame = await Game.findByPk(request.params.gameId, {include: [User]});
 
-            const correct = game.question.answer[0] === answer;
-            console.log('correct test:', correct)
-            if (correct) {
-                userUpdate.score = user.score + 1
+      const allAnswered = updatedGame
+        .users
+        .every(user => user.answered)
+      console.log('allAnswered test:', allAnswered)
+      if (allAnswered) {
+        const question = await Question.findOne({
+          where: {
+            id: {
+              [Op.not]: game.questionId
             }
-            await user.update(userUpdate)
+          }
+        })
+        console.log('question test:', question.dataValues)
+        await game.setQuestion(question)
 
-            const updatedGame = await Game.findByPk(request.params.gameId, {include: [User] });
+        await User.update({
+          answered: false
+        }, {
+          where: {
+            gameId: game.id
+          }
+        })
+      }
 
-            const allAnswered = updatedGame.users.every(user => user.answered)
-            console.log('allAnswered test:', allAnswered)
-            if (allAnswered) {
-                const question = await Question.findOne({
-                    where: {
-                        id: {
-                            [Op.not]: game.questionId
-                        }
-                    }
-                })
-                console.log('question test:', question.dataValues)
-                await game.setQuestion(question)
+      await update()
+    } catch (error) {
+      console.log("error test:", error)
+    }
 
-                await User.update(
-                    {answered: false},
-                    {where: {gameId: game.id}}
-                )
-            }
+    response.send('hi')
+  });
 
-            await update()
-        } catch (error) {
-            console.log("error test:", error)
-        }
-
-        response.send('hi')
-    });
-
-    return router
+  return router
 }
 
 module.exports = factory;
