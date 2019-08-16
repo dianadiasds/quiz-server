@@ -25,10 +25,14 @@ app.use(middleware)
 app.use(parserMiddleware)
 
 async function serialize () {
+  try {
     const games = await Game
-        .findAll( { include: [User, Question] })
+      .findAll({include: [{model: User, as: 'users'}, Question]})
 
     return JSON.stringify(games)
+  } catch(error) {
+    console.log('error test:', error)
+  }
 }
 
 async function update () {

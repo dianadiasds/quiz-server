@@ -3,8 +3,10 @@ const db = require('../db.js');
 const questions = require('../questions.json')
 
 const Game = db.define(
-    'game',
-    {}
+  'game',
+  {
+    winnerId: Sequelize.INTEGER
+  }
 );
 const User = db.define(
     'user',
@@ -24,7 +26,7 @@ const Question = db.define(
 );
 User.belongsTo(Game);
 Game.belongsTo(Question)
-Game.hasMany(User);
+Game.hasMany(User)
 
 async function createQuestions () {
     const count = await Question.count()
