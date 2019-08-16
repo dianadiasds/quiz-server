@@ -2,9 +2,11 @@ const Sequelize = require('sequelize');
 const {User, Game, Question} = require('./model');
 const {Router} = require('express');
 const bcrypt = require('bcrypt');
+const { toData } = require('../auth/jwt')
 const auth = require('../auth/middleware');
 
-const Op = Sequelize.Op
+
+const Op = Sequelize.Op;
 
 function factory(stream, update) {
   const router = new Router();
@@ -47,8 +49,8 @@ function factory(stream, update) {
     }
   })
 
-    await update()
 
+    await update()
     response.send({count: users.length})
   });
 
@@ -77,44 +79,34 @@ function factory(stream, update) {
       const game = await Game.findByPk(request.params.gameId, {include: [Question]});
       // console.log('game test:', game.dataValues);
 
-      const user = await User.findByPk(parseInt(userId));
-      console.log('user test:', user.dataValues);
-
-      const userUpdate = {
-        answered: true
-      }
+      const userUpdate = {answered: true};
 
       const correct = game.question.answer[0] === answer;
-      console.log('correct test:', correct)
+      console.log('correct test:', correct);
       if (correct) {
-        userUpdate.score = user.score + 1
+          userUpdate.score = user.score + 1
       }
-      await user.update(userUpdate)
+      await user.update(userUpdate);
 
       const updatedGame = await Game.findByPk(request.params.gameId, {include: [User]});
 
-      const allAnswered = updatedGame
-        .users
-        .every(user => user.answered)
-      console.log('allAnswered test:', allAnswered)
+      const allAnswered = updatedGame.users.every(user => user.answered);
+      console.log('allAnswered test:', allAnswered);
       if (allAnswered) {
-        const question = await Question.findOne({
-          where: {
-            id: {
-              [Op.not]: game.questionId
-            }
-          }
-        })
-        console.log('question test:', question.dataValues)
-        await game.setQuestion(question)
+          const question = await Question.findAll({
+              where: {
+                  id: {
+                      [Op.not]: game.questionId
+                  }
+              }
+          });
+          console.log('question test:', question.dataValues);
+          await game.setQuestion(question);
 
-        await User.update({
-          answered: false
-        }, {
-          where: {
-            gameId: game.id
-          }
-        })
+          await User.update(
+            {answered: false},
+            {where: {gameId: game.id}}
+          )
       }
 
       await update()
