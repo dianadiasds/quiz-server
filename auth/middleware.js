@@ -1,31 +1,33 @@
 const {User} = require('../game/model')
-const { toData } = require('./jwt')
+const {toData} = require('./jwt')
 
 function auth(req, res, next) {
-  const auth = req.headers.authorization && req.headers.authorization.split(' ')
+  const auth = req.headers.authorization && req
+    .headers
+    .authorization
+    .split(' ')
   if (auth && auth[0] === 'Bearer' && auth[1]) {
     try {
       const data = toData(auth[1])
       User
         .findByPk(data.userId)
         .then(user => {
-          if (!user) return next('User does not exist')
-
+          if (!user) 
+            return next('User does not exist')
+console.log('user!!!!!!!!!!!', user);
           req.user = user
           next()
         })
         .catch(next)
+    } catch (error) {
+      res
+        .status(400)
+        .send({message: `Error ${error.name}: ${error.message}`})
     }
-    catch(error) {
-      res.status(400).send({
-        message: `Error ${error.name}: ${error.message}`,
-      })
-    }
-  }
-  else {
-    res.status(401).send({
-      message: 'Please supply some valid credentials'
-    })
+  } else {
+    res
+      .status(401)
+      .send({message: 'Please supply some valid credentials'})
   }
 }
 
