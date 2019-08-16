@@ -1,16 +1,92 @@
 [
   {
-    "question": "question 01",
+    "question": "What is the capital of NETHERLANDS?",
     "answer": [
-      "answer01",
-      "answer02"
+      "AMSTERDAM",
+      "OSLO",
+      "RABAT",
+      "NIAMEY"
     ]
   },
   {
-    "question": "question 02",
+    "question": "What is the capital of ICELAND?",
     "answer": [
-      "answer01",
-      "answer02"
+      "REYKJAVIK",
+      "BISSAU",
+      "CONAKRY",
+      "SAINT GEORGE'S"
+    ]
+  },
+  {
+    "question": "What is the capital of GERMAN?",
+    "answer": [
+      "BERLIN",
+      "WARSAW",
+      "DOHA",
+      "KINGSTOWN"
+    ]
+  },
+  {
+    "question": "What is the capital of BRAZIL?",
+    "answer": [
+      "BRASILIA",
+      "RIO DE JANEIRO",
+      "SÃO PAULO",
+      "BUENOS AIRES"
+    ]
+  },
+  {
+    "question": "What is the capital of RUSSIA?",
+    "answer": [
+      "MOSCOW",
+      "BUCHAREST",
+      "LUSAKA",
+      "MONTEVIDEO"
+    ]
+  },
+  {
+    "question": "What is the capital of JAMAICA?",
+    "answer": [
+      "KINGSTON",
+      "TEGUCIGALPA",
+      "BISSAU",
+      "BAGHDAD"
+    ]
+  },
+  {
+    "question": "What is the capital of DENMARK?",
+    "answer": [
+      "COPENHAGEN",
+      "CAIRO",
+      "ROSEAU",
+      "MALABO"
+    ]
+  },
+  {
+    "question": "What is the capital of ETHIOPIA?",
+    "answer": [
+      "ADDIS ABABA",
+      "SUVA",
+      "BANJUL",
+      "ACCRA"
+    ]
+  },
+  {
+    "question": "What is the capital of KENYA?",
+    "answer": [
+      "NAIROBI",
+      "AMMAN",
+      "RIGA",
+      "ASTANA"
+    ]
+  },
+  {
+    "question": "What is the capital of MOROCCO?",
+    "answer": [
+      "RABAT",
+      "MAPUTO",
+      "WINDHOEK",
+      "KATHMANDU"
     ]
   }
 ]

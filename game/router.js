@@ -2,65 +2,67 @@ const Sequelize = require('sequelize');
 const {User, Game, Question} = require('./model');
 const {Router} = require('express');
 const bcrypt = require('bcrypt');
+const { toData } = require('../auth/jwt')
 
-const Op = Sequelize.Op
+const Op = Sequelize.Op;
 
-function factory (stream, update) {
+function factory(stream, update) {
     const router = new Router();
 
     router.post('/user', (request, response, next) => {
         console.log('REQUEST_BODY', request.body);
         User
-            .create({
-                name: request.body.name,
-                password: bcrypt.hashSync(request.body.password, 10),
-            })
-            .then(user => {
-                response.send(user)
-            })
-            .catch(next)
+          .create({
+              name: request.body.name,
+              password: bcrypt.hashSync(request.body.password, 10),
+          })
+          .then(user => {
+              response.send(user)
+          })
+          .catch(next)
     });
 
     router.put('/start/:gameId', async (request, response, next) => {
         const count = await User
-            .update({score: 0}, {where: {gameId: request.params.gameId}})
+          .update({score: 0}, {where: {gameId: request.params.gameId}});
 
-        await update()
+        await update();
 
-        response.send({ count })
+        response.send({count})
     });
 
     router.put('/join/:gameId', async (request, response, next) => {
-        const { userId } = request.body
-        const { gameId } = request.params
+        const {userId} = request.body;
+        const {gameId} = request.params;
 
-        const user = await User.findByPk(userId)
-        user.update({ gameId })
+        const user = await User.findByPk(userId);
+        user.update({gameId});
 
-        await update()
+        await update();
 
         response.send(user)
     });
 
     router.post('/game',
-        async (request, response, next) => {
+      async (request, response, next) => {
 
-            const gameQuestion = await Question.findOne({order: [Sequelize.fn('RANDOM')], limit: 1});
+          const gameQuestion = await Question.findOne({order: [Sequelize.fn('RANDOM')], limit: 1});
 
-            console.log('gameQuestion test:', gameQuestion)
+          console.log('gameQuestion test:', gameQuestion);
 
-            const game = await Game.create({questionId: gameQuestion.id})
+          const game = await Game.create({questionId: gameQuestion.id});
 
-            const data = await serialize()
-            stream.send(data)
+          await update();
 
-            response.send(game)
-        });
+          response.send(game)
+      });
 
     router.put('/answer/:gameId', async (request, response, next) => {
-        const { userId, answer } = request.body;
-        console.log("userId test:", userId)
+        const {jwt, answer} = request.body;
+        console.log("userId test:", jwt);
         console.log('answer test:', answer);
+
+        const { userId } = toData(jwt)
 
         try {
             const game = await Game.findByPk(request.params.gameId, {include: [Question]});
@@ -69,33 +71,33 @@ function factory (stream, update) {
             const user = await User.findByPk(parseInt(userId));
             console.log('user test:', user.dataValues);
 
-            const userUpdate = {answered: true}
+            const userUpdate = {answered: true};
 
             const correct = game.question.answer[0] === answer;
-            console.log('correct test:', correct)
+            console.log('correct test:', correct);
             if (correct) {
                 userUpdate.score = user.score + 1
             }
-            await user.update(userUpdate)
+            await user.update(userUpdate);
 
-            const updatedGame = await Game.findByPk(request.params.gameId, {include: [User] });
+            const updatedGame = await Game.findByPk(request.params.gameId, {include: [User]});
 
-            const allAnswered = updatedGame.users.every(user => user.answered)
-            console.log('allAnswered test:', allAnswered)
+            const allAnswered = updatedGame.users.every(user => user.answered);
+            console.log('allAnswered test:', allAnswered);
             if (allAnswered) {
-                const question = await Question.findOne({
+                const question = await Question.findAll({
                     where: {
                         id: {
                             [Op.not]: game.questionId
                         }
                     }
-                })
-                console.log('question test:', question.dataValues)
-                await game.setQuestion(question)
+                });
+                console.log('question test:', question.dataValues);
+                await game.setQuestion(question);
 
                 await User.update(
-                    {answered: false},
-                    {where: {gameId: game.id}}
+                  {answered: false},
+                  {where: {gameId: game.id}}
                 )
             }
 
